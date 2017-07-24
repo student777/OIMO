@@ -3,7 +3,7 @@ from datetime import date, timedelta
 import random
 
 INIT_KRW = 1000000
-COINS = ['BTC', 'DASH', 'ETC', 'ETH', 'XRP']
+COINS = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP']
 START_DATE = date(2017, 5, 3)
 END_DATE = date(2017, 7, 23)
 PERIOD_DAYS = 7
@@ -73,11 +73,24 @@ def trade_daily(date, coin_prev, volume_prev):
     return coin, volume
 
 
+# FIXME
+# if __name__ == '__main__':
+#     assets = INIT_KRW
+#     date = START_DATE
+#     coin = 'KRW'
+#     volume = INIT_KRW
+#     while date <= END_DATE:
+#         coin, volume = trade_daily(date, coin, volume)
+#         date += timedelta(days=1)
+
 if __name__ == '__main__':
-    assets = INIT_KRW
-    date = START_DATE
-    coin = 'KRW'
-    volume = INIT_KRW
-    while date <= END_DATE:
-        coin, volume = trade_daily(date, coin, volume)
-        date += timedelta(days=1)
+    a = []
+    for coin in COINS:
+        a.append(read_data(coin))
+    ret = []
+    for item in zip(*a):
+        date = item[0][0]
+        price_list = [i[1] for i in item]
+        ret.append((date, price_list))
+    for z in ret[::-1]:
+        print('{}/{}-99:99,{},{},{},{},{},{}'.format(z[0][5:7], z[0][8:10], *z[1]))
