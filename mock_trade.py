@@ -1,9 +1,10 @@
 from operator import itemgetter
 from datetime import date, timedelta
+import random
 
 INIT_KRW = 1000000
 COINS = ['BTC', 'DASH', 'ETC', 'ETH', 'XRP']
-START_DATE = date(2017, 7, 1)
+START_DATE = date(2017, 5, 3)
 END_DATE = date(2017, 7, 23)
 PERIOD_DAYS = 7
 TRANSACTION_RATE = 0.0015
@@ -16,7 +17,7 @@ def read_data(coin):
         return [(line.split()[0], float(line.split()[1].replace(',', ''))) for line in lines]
 
 
-def get_best_coin(date, delta=PERIOD_DAYS):
+def get_best_coin(date, delta=PERIOD_DAYS, get_crazy=False, get_only_one=False):
     coin_list = []
     for coin in COINS:
         price_list = read_data(coin)
@@ -31,11 +32,16 @@ def get_best_coin(date, delta=PERIOD_DAYS):
 
     # control group: buy KRW when bear market
     coin_list.append(('KRW', 1, 0))
+
+    if get_crazy:
+        return random.choice(coin_list)
+    elif get_only_one:
+        return coin_list[0]  # Modify here
     return max(coin_list, key=itemgetter(2))
 
 
 def trade_daily(date, coin_prev, volume_prev):
-    coin, price, increase_rate = get_best_coin(date)
+    coin, price, increase_rate = get_best_coin(date)  # Modify here
 
     # 1) KRW -> KRW, COIN -> COIN
     if coin_prev == coin:
