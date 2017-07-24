@@ -12,7 +12,7 @@ from keys import connect_key, secret_key
 def get_public(service, currency):
     url = 'https://api.bithumb.com/public/{}/{}'.format(service, currency)
     with urllib.request.urlopen(url) as response:
-        response_dict = json.loads(response.read())
+        response_dict = json.loads(response.read().decode('utf-8'))
         return response_dict
 
 
@@ -54,7 +54,7 @@ def trade(service, currency, extra_params={}):
 
     r = urllib.request.Request(url, data=params, method='POST', headers=headers)
     with urllib.request.urlopen(r) as response:
-        response_dict = json.loads(response.read().decode('utf-8'))
+        response_dict = json.loads(response.read().decode('utf-8'))  # .decode(): for python 3.5
         return response_dict
 
 
