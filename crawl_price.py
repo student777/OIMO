@@ -12,4 +12,5 @@ with open('data/COINS_KRW', 'a') as f:
         response = get_public(service_name, currency)
         last_item = response['data'][0]
         price_list.append(last_item['price'])
-    f.write('{},{},{},{},{},{},{}\n'.format(timestamp, *price_list))
+    row = ','.join([timestamp] + price_list)
+    f.write(row + '\n')
