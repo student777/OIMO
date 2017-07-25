@@ -32,7 +32,7 @@ class myHandler(BaseHTTPRequestHandler):
     coins = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP']
 
     def read_lines(self):
-        with open('data/COINS_KRW') as f:
+        with open('data.csv') as f:
             lines = f.readlines()[-1:0:-1]
             return lines
 
