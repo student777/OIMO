@@ -6,7 +6,7 @@ COINS = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP']
 service_name = 'recent_transactions'
 timestamp = datetime.now().strftime('%m/%d-%H:%M')
 
-with open('data/COINS_KRW', 'a') as f:
+with open('data.csv', 'a') as f:
     price_list = []
     for currency in COINS:
         response = get_public(service_name, currency)

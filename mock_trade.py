@@ -10,13 +10,7 @@ PERIOD_DAYS = 7
 TRANSACTION_RATE = 0.0015
 
 
-def read_data(coin):
-    filename = 'data/{}_KRW'.format(coin)
-    with open(filename) as f:
-        lines = f.readlines()
-        return [(line.split()[0], float(line.split()[1].replace(',', ''))) for line in lines]
-
-
+# FIXME!
 def get_best_coin(date, delta=PERIOD_DAYS, get_crazy=False, get_only_one=False):
     coin_list = []
     for coin in COINS:
@@ -73,24 +67,11 @@ def trade_daily(date, coin_prev, volume_prev):
     return coin, volume
 
 
-# FIXME
-# if __name__ == '__main__':
-#     assets = INIT_KRW
-#     date = START_DATE
-#     coin = 'KRW'
-#     volume = INIT_KRW
-#     while date <= END_DATE:
-#         coin, volume = trade_daily(date, coin, volume)
-#         date += timedelta(days=1)
-
 if __name__ == '__main__':
-    a = []
-    for coin in COINS:
-        a.append(read_data(coin))
-    ret = []
-    for item in zip(*a):
-        date = item[0][0]
-        price_list = [i[1] for i in item]
-        ret.append((date, price_list))
-    for z in ret[::-1]:
-        print('{}/{}-99:99,{},{},{},{},{},{}'.format(z[0][5:7], z[0][8:10], *z[1]))
+    assets = INIT_KRW
+    date = START_DATE
+    coin = 'KRW'
+    volume = INIT_KRW
+    while date <= END_DATE:
+        coin, volume = trade_daily(date, coin, volume)
+        date += timedelta(days=1)
