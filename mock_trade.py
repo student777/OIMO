@@ -1,6 +1,8 @@
 from operator import itemgetter
 from datetime import date, timedelta
 import random
+from render import read_data
+
 
 INIT_KRW = 1000000
 COINS = ['BTC', 'ETH', 'DASH', 'LTC', 'ETC', 'XRP']
@@ -10,30 +12,25 @@ PERIOD_DAYS = 7
 TRANSACTION_RATE = 0.0015
 
 
-# FIXME!
-def get_best_coin(date, delta=PERIOD_DAYS, get_crazy=False, get_only_one=False):
+# FIXME
+def get_best_coin(date, delta=PERIOD_DAYS, get_crazy=False, get_only_ETH=False):
     coin_list = []
-    for coin in COINS:
-        price_list = read_data(coin)
-        for item in price_list:
-            if item[0] == date.strftime('%Y-%m-%d'):
-                break
-        idx = price_list.index(item)
-        curr_price = price_list[idx][1]
-        prev_price = price_list[idx + delta][1]
-        increase_rate = (curr_price - prev_price) / curr_price
-        coin_list.append((coin, curr_price, increase_rate))
+
+    price_now = read_data(date=date.today())[1]
+    date_before = date.today() - timedelta(delta)
+    price_prev = read_data(date=date_before)[1]
+    rate_list = [(coin, a, (a - b) / b) for coin, a, b in zip(COINS, price_now, price_prev)]
 
     # control group: buy KRW when bear market
-    coin_list.append(('KRW', 1, 0))
+    rate_list.append(('KRW', 1, 0))
 
     if get_crazy:
-        return random.choice(coin_list)
-    elif get_only_one:
-        return coin_list[0]  # Modify here
-    return max(coin_list, key=itemgetter(2))
+        return random.choice(rate_list)
+    elif get_only_ETH:
+        return rate_list[1]
+    return max(rate_list, key=itemgetter(2))
 
-
+# FIXME
 def trade_daily(date, coin_prev, volume_prev):
     coin, price, increase_rate = get_best_coin(date)  # Modify here
 
@@ -50,7 +47,7 @@ def trade_daily(date, coin_prev, volume_prev):
         trade = '{}판매'.format(coin_prev)
         price_list = read_data(coin_prev)
         for d, p in price_list:
-            if d == date.strftime('%Y-%m-%d'):
+            if d == date.strftime('%m/%d'):
                 break
         volume = volume_prev * p * (1 - TRANSACTION_RATE)
     # 4) COIN1 -> COIN2
@@ -58,7 +55,7 @@ def trade_daily(date, coin_prev, volume_prev):
         trade = '{}구매'.format(coin)
         price_list = read_data(coin_prev)
         for d, p in price_list:
-            if d == date.strftime('%Y-%m-%d'):
+            if d == date.strftime('%m/%d'):
                 break
         krw = volume_prev * p * (1 - TRANSACTION_RATE)
         volume = krw / price * (1 - TRANSACTION_RATE)

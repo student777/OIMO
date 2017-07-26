@@ -4,37 +4,42 @@ from datetime import date, timedelta
 def read_data(**kwargs):
     with open('data.csv') as f:
         lines = [line.strip().split(',') for line in f.readlines()[-1:0:-1]]
+        lines_cleaned = [(line[0], [int(float(i)) for i in line[1:]]) for line in lines]
         if kwargs.get('select_all'):
-            return lines
+            return lines_cleaned
 
-        for line in lines:
+        for line in lines_cleaned:
             timestamp = line[0]
             if timestamp[:5] == kwargs['date'].strftime('%m/%d'):
-                # return [timestamp] + [int(float(i)) for i in line[1:]]
                 return line
+
+
+def make_tr(name, num_list, active=False):
+    td_list = ['<td>{}</td>'.format(item) for item in [name] + num_list]
+    if active:
+        row = '<tr class="table-active">{}</tr>'.format(''.join(td_list))
+    else:
+        row = '<tr>{}</tr>'.format(''.join(td_list))
+    return row
 
 
 def htmlize_price():
     rows = []
     for line in read_data(select_all=True):
-        timestamp = line[0]
-        price_list = ['{0:,}'.format(int(float(price))) for price in line[1:]]
-        td_list = ['<td>{}</td>'.format(item) for item in [timestamp] + price_list]
-        row = '<tr>{}</tr>'.format(''.join(td_list))
+        row = make_tr(*line)
         rows.append(row)
     return ''.join(rows)
 
 
 def htmlize_rate():
-    price_now = [int(float(i)) for i in read_data(date=date.today())[1:]]
+    price_now = read_data(date=date.today())[1]
     rows = []
     for i in range(7, 0, -1):
-        dt = date.today() - timedelta(i)
-        price_prev = [int(float(i)) for i in read_data(date=dt)[1:]]
-        rate_list = ['{:.2f}%'.format((100 * (a - b) / b)) for a, b in zip(price_now, price_prev)]
         name = 'RSI(days={})'.format(i)
-        td_list = ['<td>{}</td>'.format(item) for item in [name] + rate_list]
-        row = '<tr class="table-active">{}</tr>'.format(''.join(td_list))
+        dt = date.today() - timedelta(i)
+        price_prev = read_data(date=dt)[1]
+        rate_list = ['{:.2f}%'.format((100 * (a - b) / b)) for a, b in zip(price_now, price_prev)]
+        row = make_tr(name, rate_list, active=True)
         rows.append(row)
     return ''.join(rows)
 
