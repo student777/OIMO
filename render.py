@@ -1,4 +1,4 @@
-from datetime import date, timedelta
+from datetime import date as Date, timedelta
 
 
 def read_data(**kwargs):
@@ -26,18 +26,20 @@ def make_tr(name, num_list, active=False):
 def htmlize_price():
     rows = []
     for line in read_data(select_all=True):
-        row = make_tr(*line)
+        name = line[0]
+        price_list = ['{:,}'.format(i) for i in line[1]]
+        row = make_tr(name, price_list)
         rows.append(row)
     return ''.join(rows)
 
 
 def htmlize_rate():
-    price_now = read_data(date=date.today())[1]
+    price_now = read_data(date=Date.today())[1]
     rows = []
     for i in range(7, 0, -1):
         name = 'RSI(days={})'.format(i)
-        dt = date.today() - timedelta(i)
-        price_prev = read_data(date=dt)[1]
+        date = Date.today() - timedelta(i)
+        price_prev = read_data(date=date)[1]
         rate_list = ['{:.2f}%'.format((100 * (a - b) / b)) for a, b in zip(price_now, price_prev)]
         row = make_tr(name, rate_list, active=True)
         rows.append(row)
