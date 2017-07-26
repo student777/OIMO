@@ -1,44 +1,42 @@
 from datetime import date, timedelta
 
 
-def read_lines():
+def read_data(**kwargs):
     with open('data.csv') as f:
         lines = [line.strip().split(',') for line in f.readlines()[-1:0:-1]]
-        return lines
+        if kwargs.get('select_all'):
+            return lines
+
+        for line in lines:
+            timestamp = line[0]
+            if timestamp[:5] == kwargs['date'].strftime('%m/%d'):
+                # return [timestamp] + [int(float(i)) for i in line[1:]]
+                return line
 
 
 def htmlize_price():
-    data = []
-    for line in read_lines():
+    rows = []
+    for line in read_data(select_all=True):
         timestamp = line[0]
         price_list = ['{0:,}'.format(int(float(price))) for price in line[1:]]
         td_list = ['<td>{}</td>'.format(item) for item in [timestamp] + price_list]
         row = '<tr>{}</tr>'.format(''.join(td_list))
-        data.append(row)
-    return ''.join(data)
+        rows.append(row)
+    return ''.join(rows)
 
 
 def htmlize_rate():
-    today = date.today().strftime('%m/%d')
-    days_before = (date.today() + timedelta(-7)).strftime('%m/%d')
-    curr, prev = (None, None)
-    for line in read_lines():
-        mmdd = line[0][:5]
-        price_list = line[1:]
-        if mmdd == today:
-            curr = [int(float(i)) for i in price_list]
-            continue
-        if mmdd == days_before:
-            prev = [int(float(i)) for i in price_list]
-            break
-    if curr is None or prev is None:
-        return 'rate error'
-
-    rate_list = ['{:.2f}%'.format((100 * (a - b) / b)) for a, b in zip(curr, prev)]
-    name = 'RSI(7)'
-    td_list = ['<td>{}</td>'.format(item) for item in [name] + rate_list]
-    row = '<tr>{}</tr>'.format(''.join(td_list))
-    return row
+    price_now = [int(float(i)) for i in read_data(date=date.today())[1:]]
+    rows = []
+    for i in range(7, 0, -1):
+        dt = date.today() - timedelta(i)
+        price_prev = [int(float(i)) for i in read_data(date=dt)[1:]]
+        rate_list = ['{:.2f}%'.format((100 * (a - b) / b)) for a, b in zip(price_now, price_prev)]
+        name = 'RSI(days={})'.format(i)
+        td_list = ['<td>{}</td>'.format(item) for item in [name] + rate_list]
+        row = '<tr class="table-active">{}</tr>'.format(''.join(td_list))
+        rows.append(row)
+    return ''.join(rows)
 
 
 def render():
@@ -50,7 +48,7 @@ def render():
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
         </head>
         <body>
-            <table class="table">
+            <table class="table table-hover table-sm">
                 <thead>
                     <tr>
                         <th>#</th>
@@ -62,7 +60,8 @@ def render():
                         <th>XRP</th>
                     </tr>
                 </thead>
-                <tbody>{}{}</tbody>
+                <tbody>{}</tbody>
+                <tbody>{}</tbody>
             </table>
             </body>
         </html>
