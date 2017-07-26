@@ -10,7 +10,6 @@ def read_lines():
 def htmlize_price():
     data = []
     for line in read_lines():
-        print(read_lines())
         timestamp = line[0]
         price_list = ['{0:,}'.format(int(float(price))) for price in line[1:]]
         td_list = ['<td>{}</td>'.format(item) for item in [timestamp] + price_list]
@@ -33,7 +32,7 @@ def htmlize_rate():
             prev = [int(float(i)) for i in price_list]
             break
     if curr is None or prev is None:
-        return ''
+        return 'rate error'
 
     rate_list = ['{:.2f}%'.format((100 * (a - b) / b)) for a, b in zip(curr, prev)]
     name = 'RSI(7)'
@@ -69,3 +68,8 @@ def render():
         </html>
         '''
     return template.format(htmlize_rate(), htmlize_price())
+
+
+if __name__ == '__main__':
+    with open('index.html', 'w') as f:
+        f.write(render())
